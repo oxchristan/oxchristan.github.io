@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chris Tan 个人主页</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        body { font-family: 'Noto Sans SC', sans-serif; background-color: #f3f4f6; }
+
+        /* 磨砂玻璃特效 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.3s ease;
+        }
+        .glass-card:hover { transform: translateY(-2px); }
+
+        /* 时间轴样式 */
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100%;
+            background-color: #cbd5e1;
+            z-index: 0;
+        }
+        .timeline-dot {
+            z-index: 10;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 0 4px #f3f4f6;
+        }
+        .timeline-dot:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+
+        /* 头像容器样式 */
+        .avatar-container {
+            position: relative;
+            width: 7rem;
+            height: 7rem;
+            margin: 0 auto 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .avatar-container:hover {
+            transform: scale(1.05);
+        }
+
+        .avatar-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            ring: 4px;
+            ring-color: white;
+        }
+
+        .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #3b82f6 0%, #9333ea 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.25rem;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .avatar-upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .avatar-container:hover .avatar-upload-overlay {
+            opacity: 1;
+        }
+
+        .avatar-upload-text {
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        #avatarInput {
+            display: none;
+        }
+    </style>
+</head>
+<body class="text-gray-800 selection:bg-blue-200">
+
+    <header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+            <div class="text-xl font-bold text-blue-900 tracking-tighter">Chris Tan</div>
+            <nav class="hidden md:flex space-x-8 text-sm font-medium">
+                <a href="#overview" class="text-gray-500 hover:text-blue-900 transition">概览</a>
+                <a href="#experience" class="text-gray-500 hover:text-blue-900 transition">工作经历</a>
+                <a href="#skills" class="text-gray-500 hover:text-blue-900 transition">技能栈</a>
+                <a href="#education" class="text-blue-500 hover:text-blue-900 transition">教育背景</a>
+            </nav>
+            <a href="mailto:oxchristan@gmail.com" class="bg-slate-900 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition shadow-lg shadow-blue-900/20">
+                联系我
+            </a>
+        </div>
+    </header>
+
+    <section id="overview" class="pt-12 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="md:col-span-1">
+                <div class="glass-card rounded-3xl p-8 text-center h-full relative overflow-hidden border-t-4 border-blue-500">
+                    <!-- 头像上传区域 -->
+                    <div class="avatar-container" onclick="document.getElementById('avatarInput').click()">
+                        <div id="avatarDisplay" class="avatar-placeholder">
+                            TQ
+                        </div>
+                        <div class="avatar-upload-overlay">
+                            <div class="avatar-upload-text">
+                                <i class="fas fa-camera mb-1"></i><br>
+                                点击上传头像
+                            </div>
+                        </div>
+                    </div>
+                    <input type="file" id="avatarInput" accept="image/*">
+
+                    <h1 class="text-2xl font-bold text-gray-900 mb-4">谭倩</h1>
+                    <p class="text-blue-600 font-medium mb-6 bg-blue-50 inline-block px-3 py-1 rounded-full text-sm">资深战略分析师 | 金融硕士 | 通过CFA三级</p>
+
+                    <div class="space-y-4 text-left text-sm text-gray-600 mt-8 px-2">
+                        <div class="flex items-center p-2 hover:bg-gray-50 rounded-lg transition">
+                            <i class="fas fa-phone w-8 text-blue-500 text-center"></i> (86)180-2002-6509
+                        </div>
+                        <div class="flex items-center p-2 hover:bg-gray-50 rounded-lg transition">
+                            <i class="fas fa-envelope w-8 text-blue-500 text-center"></i> oxchristan@gmail.com
+                        </div>
+                        <div class="flex items-center p-2 hover:bg-gray-50 rounded-lg transition">
+                            <i class="fas fa-university w-8 text-blue-500 text-center"></i> 北大&UCL MBA
+                        </div>
+                        <div class="flex items-center p-2 hover:bg-gray-50 rounded-lg transition">
+                            <i class="fas fa-map-marker-alt w-8 text-blue-500 text-center"></i> 现居地：北京
+                        </div>
+                        <div class="flex items-center p-2 hover:bg-gray-50 rounded-lg transition">
+                            <i class="fas fa-link w-8 text-blue-500 text-center"></i>
+                            <a href="https://xsgyljwxp0.feishu.cn/docx/VSjPdTYuzoSjhIxEI2scDVIunnc" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline transition">
+                                更多信息
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:col-span-2">
+                <div class="glass-card rounded-3xl p-8 h-full flex flex-col">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-chart-pie mr-2 text-blue-600"></i> 核心竞争力
+                    </h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-grow items-center">
+                        <!-- 雷达图容器 - 添加flex居中 -->
+                        <div class="flex items-center justify-center">
+                            <div id="skillsChart" class="h-64 w-full"></div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 content-center">
+                            <div class="bg-gradient-to-r from-blue-50 to-white rounded-xl p-4 border border-blue-100 shadow-sm hover:shadow-md transition group">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="text-3xl font-extrabold text-blue-900 group-hover:scale-105 transition-transform origin-left">6年+</div>
+                                        <div class="text-sm text-gray-600 font-medium">集团战略与BP经验</div>
+                                    </div>
+                                    <i class="fas fa-briefcase text-blue-200 text-2xl"></i>
+                                </div>
+                                <div class="text-xs text-gray-400 mt-2">爱奇艺👉网易👉完美世界</div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-green-50 to-white rounded-xl p-4 border border-green-100 shadow-sm hover:shadow-md transition group">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="text-3xl font-extrabold text-green-700 group-hover:scale-105 transition-transform origin-left">ROAS ~69</div>
+                                        <div class="text-sm text-gray-600 font-medium">游戏出海发行成效</div>
+                                    </div>
+                                    <i class="fas fa-globe-americas text-green-200 text-2xl"></i>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-purple-50 to-white rounded-xl p-4 border border-purple-100 shadow-sm hover:shadow-md transition group">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="text-3xl font-extrabold text-purple-800 group-hover:scale-105 transition-transform origin-left">4000+万元</div>
+                                        <div class="text-sm text-gray-600 font-medium">元宇宙营销战略首年收入</div>
+                                    </div>
+                                    <i class="fas fa-vr-cardboard text-purple-200 text-2xl"></i>
+                                </div>
+                                <div class="text-xs text-gray-400 mt-2">推动虚拟人IP/NFT落地</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="experience" class="py-16 bg-white/50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-blue-600 font-semibold tracking-wider uppercase text-sm">Career Path</span>
+                <h2 class="text-3xl font-bold text-gray-900 mt-2">职业轨迹</h2>
+            </div>
+
+            <div class="relative">
+                <div class="timeline-line hidden md:block"></div>
+
+                <div class="relative z-10 mb-16 md:grid md:grid-cols-2 md:gap-16 items-start group">
+                    <div class="md:text-right mb-4 md:mb-0 pt-2">
+                        <h3 class="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition">完美世界</h3>
+                        <p class="text-blue-600 font-medium">资深战略分析师 (游戏&泛娱乐)</p>
+                        <p class="text-sm text-gray-400 font-mono mt-1">2023/03 — 至今</p>
+                    </div>
+                    <div class="absolute left-1/2 transform -translate-x-1/2 hidden md:flex items-center justify-center w-10 h-10 bg-blue-600 rounded-full timeline-dot text-white shadow-lg">
+                        <i class="fas fa-gamepad text-sm"></i>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-blue-500 bg-white hover:bg-blue-50/50 transition shadow-sm">
+                        <ul class="space-y-3 text-sm text-gray-700">
+                            <li class="flex items-start"><i class="fas fa-check-circle text-blue-400 mt-1 mr-2 text-xs"></i><span><strong>海外市场:</strong> 搭建覆盖美日韩MENA东南亚等10+海外市场的评估体系，圈定以美国为中心的出海战略。</span></li>
+                            <li class="flex items-start"><i class="fas fa-check-circle text-blue-400 mt-1 mr-2 text-xs"></i><span><strong>数据驱动:</strong> 搭建AI爬虫与用户情感分析体系，量化用户需求与痛点，实时监测潜力热点产品。</span></li>
+                            <li class="flex items-start"><i class="fas fa-check-circle text-blue-400 mt-1 mr-2 text-xs"></i><span><strong>成功案例:</strong> 推动4款以上产品立项；支持IP手游出海发行策略，实现ROAS~69，自然安装超50%。</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="relative z-10 mb-16 md:grid md:grid-cols-2 md:gap-16 items-start group">
+                    <div class="order-2 md:order-1 glass-card p-6 rounded-2xl border-r-4 border-purple-500 bg-white hover:bg-purple-50/50 transition shadow-sm md:text-right">
+                        <ul class="space-y-3 text-sm text-gray-700 inline-block text-left md:text-right">
+                            <li class="flex md:flex-row-reverse items-start gap-2">
+                                <i class="fas fa-check-circle text-purple-400 mt-1 text-xs"></i>
+                                <span>定期输出公司级战略规划，挖掘潜在投资标的</span>
+                            </li>
+                            <li class="flex md:flex-row-reverse items-start gap-2">
+                                <i class="fas fa-check-circle text-purple-400 mt-1 text-xs"></i>
+                                <span>推动元宇宙营销战略落地，首年增量收入超4000万，投资虚拟人MCN一年估值翻5倍</span>
+                            </li>
+                            <li class="flex md:flex-row-reverse items-start gap-2">
+                                <i class="fas fa-check-circle text-purple-400 mt-1 text-xs"></i>
+                                <span>作为内容营销与IP业务BP，落地多个收入超百万级的商业化项目</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="absolute left-1/2 transform -translate-x-1/2 hidden md:flex items-center justify-center w-10 h-10 bg-purple-600 rounded-full timeline-dot text-white shadow-lg">
+                        <i class="fas fa-rocket text-sm"></i>
+                    </div>
+                    <div class="order-1 md:order-2 mb-4 md:mb-0 pt-2">
+                        <h3 class="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition">网易传媒</h3>
+                        <p class="text-purple-600 font-medium">高级战略投资分析师</p>
+                        <p class="text-sm text-gray-400 font-mono mt-1">2021/01 — 2023/03</p>
+                    </div>
+                </div>
+
+                <div class="relative z-10 md:grid md:grid-cols-2 md:gap-16 items-start group">
+                    <div class="md:text-right mb-4 md:mb-0 pt-2">
+                        <h3 class="text-xl font-bold text-gray-900 group-hover:text-green-600 transition">爱奇艺</h3>
+                        <p class="text-green-600 font-medium">商业数据分析师</p>
+                        <p class="text-sm text-gray-400 font-mono mt-1">2019/07 — 2020/09</p>
+                    </div>
+                    <div class="absolute left-1/2 transform -translate-x-1/2 hidden md:flex items-center justify-center w-10 h-10 bg-green-600 rounded-full timeline-dot text-white shadow-lg">
+                        <i class="fas fa-video text-sm"></i>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-green-500 bg-white hover:bg-green-50/50 transition shadow-sm">
+                        <ul class="space-y-3 text-sm text-gray-700">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-400 mt-1 mr-2 text-xs"></i>
+                                <span>搭建品牌广告核心数据看板与监测体系</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-400 mt-1 mr-2 text-xs"></i>
+                                <span>推动创新广告产品与新消费品牌营销策略落地</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="glass-card rounded-3xl p-8 hover:bg-white transition">
+                <h2 class="text-xl font-bold text-gray-900 mb-8 flex items-center"><i class="fas fa-tools mr-3 text-gray-400"></i>技能证书</h2>
+
+                <div class="mb-8">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">数据与技术</h3>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-semibold border border-slate-200">MS Office</span>
+                        <span class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-semibold border border-slate-200">Python</span>
+                        <span class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-semibold border border-slate-200">SQL</span>
+                        <span class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-semibold border border-slate-200">Tableau</span>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">金融与投资</h3>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="px-4 py-2 bg-yellow-50 text-yellow-800 rounded-lg text-sm font-bold border border-yellow-200 shadow-sm flex items-center"><i class="fas fa-certificate mr-2 text-yellow-600"></i>通过CFA三级</span>
+                        <span class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium">证券/基金/银行从业资格</span>
+                        <span class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium">成功的战投项目与业务整合经验</span>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">语言能力</h3>
+                    <div class="flex flex-wrap gap-3">
+                        <span><i class="fas fa-language mr-2"></i>托福 102</span>
+                        <span><i class="fas fa-check mr-2"></i>中文 (母语)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="education" class="glass-card rounded-3xl p-8 bg-blue-50 text-slate-800 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-40 h-40 bg-blue-500 rounded-full opacity-10 filter blur-3xl transform translate-x-10 -translate-y-10"></div>
+
+                <h2 class="text-xl font-bold mb-8 flex items-center"><i class="fas fa-graduation-cap mr-3 text-blue-500"></i> 教育背景</h2>
+
+                <div class="space-y-10 relative z-10">
+                    <div class="relative pl-6 border-l-2 border-blue-500">
+                        <h3 class="font-bold text-lg text-lg">北京大学 & UCL <span class="text-blue-400 text-base ml-2">MBA</span></h3>
+                        <p class="text-slate-400 text-sm font-mono mt-1">2024/09 — 2026/12 (在读)</p>
+                        <div class="mt-2 inline-block px-2 py-1 bg-blue-100 rounded border text-xs text-blue-700">
+                            国际资质奖学金
+                        </div>
+                    </div>
+
+                    <div class="relative pl-6 border-l-2 border-slate-600">
+                        <h3 class="font-bold text-lg text-lg">天津财经大学 <span class="text-slate-500 text-base ml-2">金融学硕士</span></h3>
+                        <p class="text-slate-500 text-sm font-mono mt-1">2016/09 — 2019/07</p>
+                        <p class="text-xs text-slate-400 mt-1">入学成绩第1名 | GPA 3.66/4</p>
+                    </div>
+
+                    <div class="relative pl-6 border-l-2 border-slate-700">
+                        <h3 class="font-bold text-lg text-lg">西昌学院 <span class="text-slate-500 text-base ml-2">经济学学士</span></h3>
+                        <p class="text-slate-500 text-sm font-mono mt-1">2012/09 — 2016/07</p>
+                    </div>
+                </div>
+
+                <div class="mt-10 pt-6 border-t border-slate-700">
+                    <h3 class="font-bold mb-3 text-xs uppercase tracking-widest text-slate-400">个人兴趣</h3>
+                    <div class="flex flex-wrap gap-4 text-sm text-slate-700">
+                        <span class="flex items-center"><i class="fas fa-chart-line mr-2 text-green-400"></i> 投资理财 (>6年)</span>
+                        <span class="flex items-center"><i class="fas fa-video mr-2 text-pink-400"></i> 内容创作 (8k粉)</span>
+                        <span class="flex items-center">🏀 篮球(大学&MBA球队队长)</span>
+                        <span class="flex items-center">🎮 游戏 (15年+)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-white border-t border-gray-200 py-8 text-center mt-8">
+        <p class="text-gray-400 text-sm">© 2025 谭倩 Chris Tan.</p>
+    </footer>
+
+    <script>
+        // 头像上传功能
+        const avatarInput = document.getElementById('avatarInput');
+        const avatarDisplay = document.getElementById('avatarDisplay');
+
+        avatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+
+                reader.onload = function(event) {
+                    // 创建图片元素
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    img.className = 'avatar-image';
+                    img.alt = '头像';
+
+                    // 替换占位符
+                    avatarDisplay.innerHTML = '';
+                    avatarDisplay.appendChild(img);
+                    avatarDisplay.classList.remove('avatar-placeholder');
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 初始化雷达图
+        var chartDom = document.getElementById('skillsChart');
+        var myChart = echarts.init(chartDom);
+        var option;
+
+        option = {
+            radar: {
+                indicator: [
+                    { name: '战略落地', max: 100 },
+                    { name: '数据分析', max: 100 },
+                    { name: '战略投资', max: 100 },
+                    { name: '海外市场', max: 100 },
+                    { name: '技术能力', max: 100 },
+                    { name: '项目管理', max: 100 }
+                ],
+                radius: '65%',
+                splitNumber: 4,
+                axisName: {
+                    color: '#64748b',
+                    fontWeight: 'bold'
+                },
+                splitArea: {
+                    areaStyle: {
+                        color: ['#f8fafc', '#f1f5f9', '#e2e8f0', '#cbd5e1'],
+                        shadowColor: 'rgba(0, 0, 0, 0.1)',
+                        shadowBlur: 10
+                    }
+                },
+                axisLine: { lineStyle: { color: 'rgba(0, 0, 0, 0.1)' } },
+                splitLine: { lineStyle: { color: 'rgba(0, 0, 0, 0.1)' } }
+            },
+            series: [
+                {
+                    type: 'radar',
+                    data: [
+                        {
+                            value: [95, 90, 80, 90, 80, 70],
+                            name: '核心能力',
+                            symbol: 'circle',
+                            symbolSize: 6,
+                            areaStyle: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                    { offset: 0, color: 'rgba(37, 99, 235, 0.5)' },
+                                    { offset: 1, color: 'rgba(147, 51, 234, 0.5)' }
+                                ])
+                            },
+                            lineStyle: {
+                                width: 3,
+                                color: '#2563eb'
+                            },
+                            itemStyle: {
+                                color: '#fff',
+                                borderColor: '#2563eb',
+                                borderWidth: 2
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        option && myChart.setOption(option);
+
+        // 窗口大小改变时自适应
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>
